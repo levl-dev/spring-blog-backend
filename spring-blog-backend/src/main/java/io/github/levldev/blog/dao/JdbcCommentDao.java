@@ -1,0 +1,90 @@
+package io.github.levldev.blog.dao;
+
+import io.github.levldev.blog.model.Comment;
+import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.stereotype.Repository;
+
+import java.sql.Timestamp;
+import java.util.List;
+import java.util.Optional;
+
+@Repository
+public class JdbcCommentDao implements CommentDao {
+
+    private final JdbcTemplate jdbcTemplate;
+
+    public JdbcCommentDao(JdbcTemplate jdbcTemplate) {
+        this.jdbcTemplate = jdbcTemplate;
+    }
+
+    @Override
+    public Comment create(Comment comment) {
+        String sql = "INSERT INTO public.\"comments\" (post_id, \"text\") VALUES (?, ?) RETURNING id";
+        Long id = jdbcTemplate.queryForObject(sql, Long.class, comment.getPostId(), comment.getText());
+        comment.setId(id);
+        return comment;
+    }
+
+    @Override
+    public Optional<Comment> findById(long id) {
+        String sql = "SELECT id, post_id, \"text\", created_at FROM public.\"comments\" WHERE id = ?";
+        try {
+            Comment c = jdbcTemplate.queryForObject(sql, (rs, rowNum) -> {
+                Comment comment = new Comment();
+                comment.setId(rs.getLong("id"));
+                comment.setPostId(rs.getLong("post_id"));
+                comment.setText(rs.getString("text"));
+                Timestamp created = rs.getTimestamp("created_at");
+                if (created != null) {
+                    comment.setCreatedAt(created.toLocalDateTime());
+                }
+                return comment;
+            }, id);
+            return Optional.ofNullable(c);
+        } catch (EmptyResultDataAccessException e) {
+            return Optional.empty();
+        }
+    }
+
+    @Override
+    public List<Comment> findByPostId(long postId) {
+        String sql = "SELECT id, post_id, \"text\", created_at FROM public.\"comments\" WHERE post_id = ? ORDER BY id ASC";
+        return jdbcTemplate.query(sql, (rs, rowNum) -> {
+            Comment comment = new Comment();
+            comment.setId(rs.getLong("id"));
+            comment.setPostId(rs.getLong("post_id"));
+            comment.setText(rs.getString("text"));
+            Timestamp created = rs.getTimestamp("created_at");
+            if (created != null) {
+                comment.setCreatedAt(created.toLocalDateTime());
+            }
+            return comment;
+        }, postId);
+    }
+
+    @Override
+    public Comment update(Comment comment) {
+        String sql = "UPDATE public.\"comments\" SET \"text\" = ? WHERE id = ?";
+        jdbcTemplate.update(sql, comment.getText(), comment.getId());
+        return comment;
+    }
+
+    @Override
+    public void deleteById(long id) {
+        String sql = "DELETE FROM public.\"comments\" WHERE id = ?";
+        jdbcTemplate.update(sql, id);
+    }
+
+    @Override
+    public void deleteByPostId(long postId) {
+        String sql = "DELETE FROM public.\"comments\" WHERE post_id = ?";
+        jdbcTemplate.update(sql, postId);
+    }
+
+    @Override
+    public long countByPostId(long postId) {
+        Long count = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM public.\"comments\" WHERE post_id = ?", Long.class, postId);
+        return count;
+    }
+}
