@@ -23,4 +23,9 @@ public class TestConfig {
     public PostServiceImpl postService(PostDao postDao, CommentDao commentDao) {
         return new PostServiceImpl(postDao, commentDao);
     }
+
+    @Bean
+    public CommentServiceImpl commentService(CommentDao commentDao, PostDao postDao) {
+        return new CommentServiceImpl(commentDao, postDao);
+    }
 }
