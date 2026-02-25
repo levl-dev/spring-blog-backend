@@ -1,5 +1,6 @@
 package io.github.levldev.blog.service;
 
+import io.github.levldev.blog.config.TestConfig;
 import io.github.levldev.blog.dao.CommentDao;
 import io.github.levldev.blog.dao.PostDao;
 import io.github.levldev.blog.model.Post;
@@ -176,7 +177,8 @@ class PostServiceImplSpringTest {
         when(postDao.countBySearch(argThat(SearchCriteria::isEmpty))).thenReturn(10L);
         when(postDao.findPage(argThat(SearchCriteria::isEmpty), eq(1), eq(5)))
                 .thenReturn(List.of(p1));
-        when(commentDao.countByPostId(1L)).thenReturn(0L);
+        when(commentDao.countByPostIds(List.of(1L)))
+                .thenReturn(java.util.Map.of(1L, 0));
 
         PostsPage page = postService.getPostsPage("", 1, 5);
 
@@ -195,7 +197,8 @@ class PostServiceImplSpringTest {
         p.setText("a".repeat(200));
         when(postDao.countBySearch(any(SearchCriteria.class))).thenReturn(1L);
         when(postDao.findPage(any(SearchCriteria.class), eq(1), eq(5))).thenReturn(List.of(p));
-        when(commentDao.countByPostId(1L)).thenReturn(0L);
+        when(commentDao.countByPostIds(List.of(1L)))
+                .thenReturn(java.util.Map.of(1L, 0));
 
         PostsPage page = postService.getPostsPage("foo", 1, 5);
 

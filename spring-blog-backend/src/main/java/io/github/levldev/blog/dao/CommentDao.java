@@ -3,6 +3,7 @@ package io.github.levldev.blog.dao;
 import io.github.levldev.blog.model.Comment;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 public interface CommentDao {
@@ -20,4 +21,6 @@ public interface CommentDao {
     void deleteByPostId(long postId);
 
     long countByPostId(long postId);
+
+    Map<Long, Integer> countByPostIds(List<Long> postIds);
 }

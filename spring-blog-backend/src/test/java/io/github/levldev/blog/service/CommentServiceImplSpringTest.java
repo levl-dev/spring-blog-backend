@@ -1,5 +1,6 @@
 package io.github.levldev.blog.service;
 
+import io.github.levldev.blog.config.TestConfig;
 import io.github.levldev.blog.dao.CommentDao;
 import io.github.levldev.blog.dao.PostDao;
 import io.github.levldev.blog.model.Comment;

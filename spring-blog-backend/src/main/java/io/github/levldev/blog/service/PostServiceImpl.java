@@ -101,8 +101,10 @@ public class PostServiceImpl implements PostService {
         }
 
         List<Post> posts = postDao.findPage(criteria, pageNumber, pageSize);
+        List<Long> ids = posts.stream().map(Post::getId).toList();
+        var commentsByPostId = commentDao.countByPostIds(ids);
         for (Post p : posts) {
-            int commentsCount = (int) commentDao.countByPostId(p.getId());
+            int commentsCount = commentsByPostId.getOrDefault(p.getId(), 0);
             p.setCommentsCount(commentsCount);
 
             String text = p.getText();

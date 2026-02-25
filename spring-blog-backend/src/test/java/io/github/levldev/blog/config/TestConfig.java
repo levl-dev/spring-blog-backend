@@ -1,14 +1,15 @@
-package io.github.levldev.blog.service;
+package io.github.levldev.blog.config;
 
 import io.github.levldev.blog.dao.CommentDao;
 import io.github.levldev.blog.dao.PostDao;
+import io.github.levldev.blog.service.CommentServiceImpl;
+import io.github.levldev.blog.service.PostServiceImpl;
 import org.mockito.Mockito;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class TestConfig {
-
     @Bean
     public PostDao postDao() {
         return Mockito.mock(PostDao.class);
