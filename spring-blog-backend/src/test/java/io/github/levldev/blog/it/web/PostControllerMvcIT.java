@@ -27,7 +27,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringJUnitConfig(H2MvcTestConfig.class)
 @WebAppConfiguration
 @TestPropertySource(properties = "test.mode=integration")
-class PostControllerMvcIntegrationTest {
+class PostControllerMvcIT {
 
     @Autowired
     WebApplicationContext wac;
