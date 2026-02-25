@@ -1,6 +1,6 @@
 package io.github.levldev.blog.it.dao;
 
-import io.github.levldev.blog.config.H2DataSourceTestConfig;
+import io.github.levldev.blog.config.H2DaoTestConfig;
 import io.github.levldev.blog.dao.PostDao;
 import io.github.levldev.blog.model.Post;
 import io.github.levldev.blog.service.dto.SearchCriteria;
@@ -17,7 +17,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = H2DataSourceTestConfig.class)
+@ContextConfiguration(classes = H2DaoTestConfig.class)
 class JdbcPostDaoIT {
 
     @Autowired JdbcTemplate jdbcTemplate;

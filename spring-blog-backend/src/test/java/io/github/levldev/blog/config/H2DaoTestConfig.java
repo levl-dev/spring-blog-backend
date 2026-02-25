@@ -15,7 +15,7 @@ import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
 import javax.sql.DataSource;
 
 @Configuration
-public class H2DataSourceTestConfig {
+public class H2DaoTestConfig {
 
     @Bean
     public DataSource dataSource() {
