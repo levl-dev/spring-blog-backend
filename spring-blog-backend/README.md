@@ -1,14 +1,21 @@
 # Spring Blog Backend
 
-Backend part of blog application built with Spring Framework 6 (without Spring Boot).
+REST API for a simple blog application built with Spring Framework 6 (without Spring Boot).
+
+## Features
+
+- Create, update and delete posts
+- Tag management (separate table)
+- Comment management
+- Post search and pagination
+- Image upload/download for posts
 
 ## Tech Stack
 
 - Java 21
 - Spring Framework 6
-- Spring Web MVC
-- Spring JDBC
 - PostgreSQL 17
+- H2 (for integration tests)
 - Maven
 - Tomcat
 
@@ -20,12 +27,12 @@ WAR file will be generated in /target directory.
 
 ## Run
 
-Deploy generated WAR to external servlet container (Tomcat).
+Deploy WAR to external servlet container (Tomcat).
 
 Application base URL:
-
 http://localhost:8080/{artifact-name}
 
 ## Tests
 
+Run tests:
 mvn test

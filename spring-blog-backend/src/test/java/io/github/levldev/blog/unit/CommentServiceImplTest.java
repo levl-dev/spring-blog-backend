@@ -104,7 +104,7 @@ class CommentServiceImplTest {
 
         when(postDao.findById(postId)).thenReturn(Optional.of(post(postId)));
         when(commentDao.create(any(Comment.class)))
-                .thenAnswer(invocation -> invocation.getArgument(0)); // вернём то, что передали
+                .thenAnswer(invocation -> invocation.getArgument(0));
 
         Comment result = commentService.addComment(postId, "new comment");
 
