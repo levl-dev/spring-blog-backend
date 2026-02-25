@@ -1,10 +1,11 @@
-package io.github.levldev.blog.service;
+package io.github.levldev.blog.unit;
 
-import io.github.levldev.blog.config.TestConfig;
+import io.github.levldev.blog.config.MockServiceTestConfig;
 import io.github.levldev.blog.dao.CommentDao;
 import io.github.levldev.blog.dao.PostDao;
 import io.github.levldev.blog.model.Comment;
 import io.github.levldev.blog.model.Post;
+import io.github.levldev.blog.service.CommentServiceImpl;
 import io.github.levldev.blog.web.error.ResourceNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -20,8 +21,8 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = TestConfig.class)
-class CommentServiceImplSpringTest {
+@ContextConfiguration(classes = MockServiceTestConfig.class)
+class CommentServiceImplTest {
 
     @Autowired
     private CommentServiceImpl commentService;

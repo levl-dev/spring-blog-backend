@@ -9,7 +9,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-public class TestConfig {
+public class MockServiceTestConfig {
     @Bean
     public PostDao postDao() {
         return Mockito.mock(PostDao.class);

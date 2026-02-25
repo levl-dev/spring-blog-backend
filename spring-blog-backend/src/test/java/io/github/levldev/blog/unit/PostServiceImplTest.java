@@ -1,9 +1,10 @@
-package io.github.levldev.blog.service;
+package io.github.levldev.blog.unit;
 
-import io.github.levldev.blog.config.TestConfig;
+import io.github.levldev.blog.config.MockServiceTestConfig;
 import io.github.levldev.blog.dao.CommentDao;
 import io.github.levldev.blog.dao.PostDao;
 import io.github.levldev.blog.model.Post;
+import io.github.levldev.blog.service.PostServiceImpl;
 import io.github.levldev.blog.service.dto.ImageData;
 import io.github.levldev.blog.service.dto.PostsPage;
 import io.github.levldev.blog.service.dto.SearchCriteria;
@@ -23,8 +24,8 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = TestConfig.class)
-class PostServiceImplSpringTest {
+@ContextConfiguration(classes = MockServiceTestConfig.class)
+class PostServiceImplTest {
 
     @Autowired
     private PostServiceImpl postService;
