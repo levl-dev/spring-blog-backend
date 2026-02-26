@@ -80,7 +80,7 @@ public class PostServiceImpl implements PostService {
     public ImageData getImage(long id) {
         getPost(id);
         ImageData imageData = postDao.getImage(id);
-        if (imageData == null || imageData.getBytes() == null) {
+        if (imageData == null || imageData.bytes() == null) {
             throw new ResourceNotFoundException("Post with id " + id + " has no image");
         }
         return imageData;

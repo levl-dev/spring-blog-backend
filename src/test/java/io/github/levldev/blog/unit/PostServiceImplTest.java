@@ -150,8 +150,8 @@ class PostServiceImplTest {
         ImageData result = postService.getImage(id);
 
         assertNotNull(result);
-        assertArrayEquals(new byte[]{1, 2}, result.getBytes());
-        assertEquals("image/jpeg", result.getContentType());
+        assertArrayEquals(new byte[]{1, 2}, result.bytes());
+        assertEquals("image/jpeg", result.contentType());
         verify(postDao).findById(id);
         verify(postDao).getImage(id);
     }
@@ -183,10 +183,10 @@ class PostServiceImplTest {
 
         PostsPage page = postService.getPostsPage("", 1, 5);
 
-        assertEquals(1, page.getPosts().size());
-        assertFalse(page.isHasPrev());
-        assertTrue(page.isHasNext());
-        assertEquals(2, page.getLastPage());
+        assertEquals(1, page.posts().size());
+        assertFalse(page.hasPrev());
+        assertTrue(page.hasNext());
+        assertEquals(2, page.lastPage());
         verify(postDao).countBySearch(any(SearchCriteria.class));
         verify(postDao).findPage(any(SearchCriteria.class), eq(1), eq(5));
     }
@@ -203,8 +203,8 @@ class PostServiceImplTest {
 
         PostsPage page = postService.getPostsPage("foo", 1, 5);
 
-        assertEquals(1, page.getPosts().size());
-        String text = page.getPosts().get(0).getText();
+        assertEquals(1, page.posts().size());
+        String text = page.posts().get(0).getText();
         assertEquals(129, text.length());
         assertTrue(text.startsWith("aaa"));
         assertTrue(text.endsWith("…"));

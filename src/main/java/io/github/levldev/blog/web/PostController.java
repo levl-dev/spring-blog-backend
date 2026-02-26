@@ -29,15 +29,15 @@ public class PostController {
     @GetMapping
     public ResponseEntity<PostsPageResponse> getPosts(@RequestParam("search") String search, @RequestParam("pageNumber") int pageNumber, @RequestParam("pageSize") int pageSize) {
         PostsPage page = postService.getPostsPage(search, pageNumber, pageSize);
-        List<PostResponse> posts = page.getPosts().stream()
+        List<PostResponse> posts = page.posts().stream()
                 .map(PostResponse::fromPost)
                 .toList();
 
         PostsPageResponse response = new PostsPageResponse(
                 posts,
-                page.isHasPrev(),
-                page.isHasNext(),
-                page.getLastPage()
+                page.hasPrev(),
+                page.hasNext(),
+                page.lastPage()
         );
 
         return ResponseEntity.ok(response);
@@ -90,17 +90,17 @@ public class PostController {
     public ResponseEntity<byte[]> getImage(@PathVariable("id") long id) {
         ImageData imageData = postService.getImage(id);
         
-        if (imageData == null || imageData.getBytes() == null) {
+        if (imageData == null || imageData.bytes() == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
 
-        String contentType = imageData.getContentType();
+        String contentType = imageData.contentType();
         if (contentType == null || contentType.isBlank()) {
             contentType = MediaType.APPLICATION_OCTET_STREAM_VALUE;
         }
 
         return ResponseEntity.ok()
                 .contentType(MediaType.parseMediaType(contentType))
-                .body(imageData.getBytes());
+                .body(imageData.bytes());
     }
 }
