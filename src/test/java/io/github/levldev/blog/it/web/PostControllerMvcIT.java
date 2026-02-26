@@ -194,7 +194,7 @@ class PostControllerMvcIT {
                 .update();
 
         mockMvc.perform(delete("/api/posts/" + id))
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
 
         mockMvc.perform(get("/api/posts/" + id))
                 .andExpect(status().isNotFound());

@@ -101,7 +101,7 @@ class CommentControllerMvcIT {
         long commentId = comment.getId();
 
         mockMvc.perform(delete("/api/posts/" + postId + "/comments/" + commentId))
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
 
         mockMvc.perform(get("/api/posts/" + postId + "/comments/" + commentId))
                 .andExpect(status().isNotFound());
