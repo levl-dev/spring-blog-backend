@@ -9,7 +9,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
-import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import org.springframework.test.context.web.WebAppConfiguration;
@@ -33,7 +33,7 @@ class PostControllerMvcIT {
     WebApplicationContext wac;
 
     @Autowired
-    JdbcTemplate jdbcTemplate;
+    JdbcClient jdbcClient;
 
     @Autowired
     PostDao postDao;
@@ -43,9 +43,9 @@ class PostControllerMvcIT {
     @BeforeEach
     void setUp() {
         mockMvc = MockMvcBuilders.webAppContextSetup(wac).build();
-        jdbcTemplate.update("DELETE FROM public.post_tags");
-        jdbcTemplate.update("DELETE FROM public.comments");
-        jdbcTemplate.update("DELETE FROM public.posts");
+        jdbcClient.sql("DELETE FROM public.post_tags").update();
+        jdbcClient.sql("DELETE FROM public.comments").update();
+        jdbcClient.sql("DELETE FROM public.posts").update();
     }
 
     @Test
@@ -75,14 +75,17 @@ class PostControllerMvcIT {
 
         Long id = response.getId();
 
-        Long postCount = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM public.posts WHERE id = ?", Long.class, id);
+        Long postCount = jdbcClient.sql("SELECT COUNT(*) FROM public.posts WHERE id = :id")
+                .param("id", id)
+                .query((rs, rowNum) -> rs.getLong(1))
+                .optional()
+                .orElse(0L);
         assertEquals(1L, postCount);
 
-        List<String> dbTags = jdbcTemplate.query(
-                "SELECT tag FROM public.post_tags WHERE post_id = ? ORDER BY tag",
-                (rs, rowNum) -> rs.getString("tag"),
-                id
-        );
+        List<String> dbTags = jdbcClient.sql("SELECT tag FROM public.post_tags WHERE post_id = :postId ORDER BY tag")
+                .param("postId", id)
+                .query((rs, rowNum) -> rs.getString("tag"))
+                .list();
         assertEquals(2, dbTags.size());
         assertTrue(dbTags.contains("TagA"));
         assertTrue(dbTags.contains("TagB"));
@@ -154,11 +157,10 @@ class PostControllerMvcIT {
         assertTrue(response.getTags().contains("TagC"));
         assertFalse(response.getTags().contains("TagA"));
 
-        List<String> dbTags = jdbcTemplate.query(
-                "SELECT tag FROM public.post_tags WHERE post_id = ? ORDER BY tag",
-                (rs, rowNum) -> rs.getString("tag"),
-                id
-        );
+        List<String> dbTags = jdbcClient.sql("SELECT tag FROM public.post_tags WHERE post_id = :postId ORDER BY tag")
+                .param("postId", id)
+                .query((rs, rowNum) -> rs.getString("tag"))
+                .list();
         assertEquals(List.of("TagB", "TagC"), dbTags);
 
         MvcResult getResult = mockMvc.perform(get("/api/posts/" + id))
@@ -186,7 +188,10 @@ class PostControllerMvcIT {
         Post created = postDao.create(p);
         long id = created.getId();
 
-        jdbcTemplate.update("INSERT INTO public.comments (post_id, \"text\") VALUES (?, ?)", id, "TestComment1");
+        jdbcClient.sql("INSERT INTO public.comments (post_id, \"text\") VALUES (:postId, :text)")
+                .param("postId", id)
+                .param("text", "TestComment1")
+                .update();
 
         mockMvc.perform(delete("/api/posts/" + id))
                 .andExpect(status().isOk());
@@ -194,13 +199,25 @@ class PostControllerMvcIT {
         mockMvc.perform(get("/api/posts/" + id))
                 .andExpect(status().isNotFound());
 
-        Long postCount = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM public.posts WHERE id = ?", Long.class, id);
+        Long postCount = jdbcClient.sql("SELECT COUNT(*) FROM public.posts WHERE id = :id")
+                .param("id", id)
+                .query((rs, rowNum) -> rs.getLong(1))
+                .optional()
+                .orElse(0L);
         assertEquals(0L, postCount);
 
-        Long tagCount = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM public.post_tags WHERE post_id = ?", Long.class, id);
+        Long tagCount = jdbcClient.sql("SELECT COUNT(*) FROM public.post_tags WHERE post_id = :postId")
+                .param("postId", id)
+                .query((rs, rowNum) -> rs.getLong(1))
+                .optional()
+                .orElse(0L);
         assertEquals(0L, tagCount);
 
-        Long commentCount = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM public.comments WHERE post_id = ?", Long.class, id);
+        Long commentCount = jdbcClient.sql("SELECT COUNT(*) FROM public.comments WHERE post_id = :postId")
+                .param("postId", id)
+                .query((rs, rowNum) -> rs.getLong(1))
+                .optional()
+                .orElse(0L);
         assertEquals(0L, commentCount);
     }
 }

@@ -8,6 +8,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.jdbc.datasource.init.DataSourceInitializer;
 import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
@@ -28,6 +29,11 @@ public class H2DaoTestConfig {
     }
 
     @Bean
+    public JdbcClient jdbcClient(DataSource ds) {
+        return JdbcClient.create(ds);
+    }
+
+    @Bean
     public JdbcTemplate jdbcTemplate(DataSource ds) {
         return new JdbcTemplate(ds);
     }
@@ -44,12 +50,12 @@ public class H2DaoTestConfig {
     }
 
     @Bean
-    public PostDao postDao(JdbcTemplate jdbcTemplate) {
-        return new JdbcPostDao(jdbcTemplate);
+    public PostDao postDao(JdbcClient jdbcClient, JdbcTemplate jdbcTemplate) {
+        return new JdbcPostDao(jdbcClient, jdbcTemplate);
     }
 
     @Bean
-    public CommentDao commentDao(JdbcTemplate jdbcTemplate) {
-        return new JdbcCommentDao(jdbcTemplate);
+    public CommentDao commentDao(JdbcClient jdbcClient) {
+        return new JdbcCommentDao(jdbcClient);
     }
 }

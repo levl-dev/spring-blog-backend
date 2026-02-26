@@ -8,7 +8,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
@@ -20,15 +20,15 @@ import static org.junit.jupiter.api.Assertions.*;
 @ContextConfiguration(classes = H2DaoTestConfig.class)
 class JdbcPostDaoIT {
 
-    @Autowired JdbcTemplate jdbcTemplate;
+    @Autowired JdbcClient jdbcClient;
     @Autowired
     PostDao postDao;
 
     @BeforeEach
     void cleanDb() {
-        jdbcTemplate.update("DELETE FROM public.post_tags");
-        jdbcTemplate.update("DELETE FROM public.comments");
-        jdbcTemplate.update("DELETE FROM public.posts");
+        jdbcClient.sql("DELETE FROM public.post_tags").update();
+        jdbcClient.sql("DELETE FROM public.comments").update();
+        jdbcClient.sql("DELETE FROM public.posts").update();
     }
 
     @Test
@@ -44,11 +44,10 @@ class JdbcPostDaoIT {
         assertNotNull(created.getId());
         assertTrue(created.getId() > 0);
 
-        List<String> dbTags = jdbcTemplate.query(
-                "SELECT tag FROM public.post_tags WHERE post_id = ? ORDER BY tag",
-                (rs, rowNum) -> rs.getString("tag"),
-                created.getId()
-        );
+        List<String> dbTags = jdbcClient.sql("SELECT tag FROM public.post_tags WHERE post_id = :postId ORDER BY tag")
+                .param("postId", created.getId())
+                .query((rs, rowNum) -> rs.getString("tag"))
+                .list();
         assertEquals(2, dbTags.size());
         assertTrue(dbTags.contains("TagA"));
         assertTrue(dbTags.contains("TagB"));
@@ -99,17 +98,15 @@ class JdbcPostDaoIT {
         assertTrue(loaded.getTags().contains("TagC"));
         assertFalse(loaded.getTags().contains("TagA"));
 
-        Long postTagsCount = jdbcTemplate.queryForObject(
-                "SELECT COUNT(*) FROM public.post_tags WHERE post_id = ?",
-                Long.class,
-                id
-        );
+        Long postTagsCount = jdbcClient.sql("SELECT COUNT(*) FROM public.post_tags WHERE post_id = :postId")
+                .param("postId", id)
+                .query((rs, rowNum) -> rs.getLong(1))
+                .single();
         assertEquals(2L, postTagsCount);
-        List<String> dbTags = jdbcTemplate.query(
-                "SELECT tag FROM public.post_tags WHERE post_id = ? ORDER BY tag",
-                (rs, rowNum) -> rs.getString("tag"),
-                id
-        );
+        List<String> dbTags = jdbcClient.sql("SELECT tag FROM public.post_tags WHERE post_id = :postId ORDER BY tag")
+                .param("postId", id)
+                .query((rs, rowNum) -> rs.getString("tag"))
+                .list();
         assertEquals(List.of("TagB", "TagC"), dbTags);
     }
 
@@ -122,22 +119,25 @@ class JdbcPostDaoIT {
         Post created = postDao.create(p);
         long postId = created.getId();
 
-        jdbcTemplate.update("INSERT INTO public.comments (post_id, \"text\") VALUES (?, ?)", postId, "TestComment1");
+        jdbcClient.sql("INSERT INTO public.comments (post_id, \"text\") VALUES (:postId, :text)")
+                .param("postId", postId)
+                .param("text", "TestComment1")
+                .update();
 
         postDao.deleteById(postId);
 
         assertTrue(postDao.findById(postId).isEmpty());
-        Long tagRows = jdbcTemplate.queryForObject(
-                "SELECT COUNT(*) FROM public.post_tags WHERE post_id = ?",
-                Long.class,
-                postId
-        );
+        Long tagRows = jdbcClient.sql("SELECT COUNT(*) FROM public.post_tags WHERE post_id = :postId")
+                .param("postId", postId)
+                .query((rs, rowNum) -> rs.getLong(1))
+                .optional()
+                .orElse(0L);
         assertEquals(0L, tagRows);
-        Long commentRows = jdbcTemplate.queryForObject(
-                "SELECT COUNT(*) FROM public.comments WHERE post_id = ?",
-                Long.class,
-                postId
-        );
+        Long commentRows = jdbcClient.sql("SELECT COUNT(*) FROM public.comments WHERE post_id = :postId")
+                .param("postId", postId)
+                .query((rs, rowNum) -> rs.getLong(1))
+                .optional()
+                .orElse(0L);
         assertEquals(0L, commentRows);
     }
 

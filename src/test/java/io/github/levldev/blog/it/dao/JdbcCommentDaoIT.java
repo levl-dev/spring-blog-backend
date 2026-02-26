@@ -9,7 +9,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
@@ -21,7 +21,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @ContextConfiguration(classes = H2DaoTestConfig.class)
 class JdbcCommentDaoIT {
 
-    @Autowired JdbcTemplate jdbcTemplate;
+    @Autowired JdbcClient jdbcClient;
     @Autowired
     CommentDao commentDao;
     @Autowired
@@ -29,9 +29,9 @@ class JdbcCommentDaoIT {
 
     @BeforeEach
     void cleanDb() {
-        jdbcTemplate.update("DELETE FROM public.post_tags");
-        jdbcTemplate.update("DELETE FROM public.comments");
-        jdbcTemplate.update("DELETE FROM public.posts");
+        jdbcClient.sql("DELETE FROM public.post_tags").update();
+        jdbcClient.sql("DELETE FROM public.comments").update();
+        jdbcClient.sql("DELETE FROM public.posts").update();
     }
 
     @Test

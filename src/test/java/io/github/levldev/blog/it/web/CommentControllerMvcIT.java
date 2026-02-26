@@ -12,7 +12,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
-import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import org.springframework.test.context.web.WebAppConfiguration;
@@ -33,7 +33,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class CommentControllerMvcIT {
 
     @Autowired WebApplicationContext wac;
-    @Autowired JdbcTemplate jdbcTemplate;
+    @Autowired JdbcClient jdbcClient;
     @Autowired PostDao postDao;
     @Autowired CommentDao commentDao;
     MockMvc mockMvc;
@@ -42,9 +42,9 @@ class CommentControllerMvcIT {
     @BeforeEach
     void setUp() {
         mockMvc = MockMvcBuilders.webAppContextSetup(wac).build();
-        jdbcTemplate.update("DELETE FROM public.post_tags");
-        jdbcTemplate.update("DELETE FROM public.comments");
-        jdbcTemplate.update("DELETE FROM public.posts");
+        jdbcClient.sql("DELETE FROM public.post_tags").update();
+        jdbcClient.sql("DELETE FROM public.comments").update();
+        jdbcClient.sql("DELETE FROM public.posts").update();
     }
 
     @Test
@@ -86,7 +86,10 @@ class CommentControllerMvcIT {
         CommentResponse response = objectMapper.readValue(result.getResponse().getContentAsString(), CommentResponse.class);
         assertEquals("UpdatedCommentText", response.getText());
 
-        String dbText = jdbcTemplate.queryForObject("SELECT \"text\" FROM public.comments WHERE id = ?", String.class, commentId);
+        String dbText = jdbcClient.sql("SELECT \"text\" FROM public.comments WHERE id = :id")
+                .param("id", commentId)
+                .query((rs, rowNum) -> rs.getString("text"))
+                .single();
         assertEquals("UpdatedCommentText", dbText);
     }
 
@@ -103,7 +106,11 @@ class CommentControllerMvcIT {
         mockMvc.perform(get("/api/posts/" + postId + "/comments/" + commentId))
                 .andExpect(status().isNotFound());
 
-        Long count = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM public.comments WHERE id = ?", Long.class, commentId);
+        Long count = jdbcClient.sql("SELECT COUNT(*) FROM public.comments WHERE id = :id")
+                .param("id", commentId)
+                .query((rs, rowNum) -> rs.getLong(1))
+                .optional()
+                .orElse(0L);
         assertEquals(0L, count);
     }
 
