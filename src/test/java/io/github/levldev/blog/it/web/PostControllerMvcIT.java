@@ -1,22 +1,18 @@
 package io.github.levldev.blog.it.web;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.github.levldev.blog.config.H2MvcTestConfig;
 import io.github.levldev.blog.dao.PostDao;
 import io.github.levldev.blog.model.Post;
 import io.github.levldev.blog.web.responses.PostResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.simple.JdbcClient;
-import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
-import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.web.context.WebApplicationContext;
 
 import java.util.List;
 
@@ -24,13 +20,15 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@SpringJUnitConfig(H2MvcTestConfig.class)
-@WebAppConfiguration
-@TestPropertySource(properties = "test.mode=integration")
+@SpringBootTest
+@AutoConfigureMockMvc
 class PostControllerMvcIT {
 
     @Autowired
-    WebApplicationContext wac;
+    MockMvc mockMvc;
+
+    @Autowired
+    ObjectMapper objectMapper;
 
     @Autowired
     JdbcClient jdbcClient;
@@ -38,11 +36,8 @@ class PostControllerMvcIT {
     @Autowired
     PostDao postDao;
 
-    MockMvc mockMvc;
-
     @BeforeEach
-    void setUp() {
-        mockMvc = MockMvcBuilders.webAppContextSetup(wac).build();
+    void cleanDb() {
         jdbcClient.sql("DELETE FROM public.post_tags").update();
         jdbcClient.sql("DELETE FROM public.comments").update();
         jdbcClient.sql("DELETE FROM public.posts").update();
@@ -61,7 +56,7 @@ class PostControllerMvcIT {
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
                 .andReturn();
 
-        PostResponse response = new ObjectMapper().readValue(
+        PostResponse response = objectMapper.readValue(
                 result.getResponse().getContentAsString(),
                 PostResponse.class
         );
@@ -99,6 +94,7 @@ class PostControllerMvcIT {
         p.setLikesCount(0);
         p.setCommentsCount(0);
         p.setTags(List.of("TagA", "TagB"));
+
         Post created = postDao.create(p);
         long id = created.getId();
 
@@ -107,7 +103,7 @@ class PostControllerMvcIT {
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
                 .andReturn();
 
-        PostResponse response = new ObjectMapper().readValue(
+        PostResponse response = objectMapper.readValue(
                 result.getResponse().getContentAsString(),
                 PostResponse.class
         );
@@ -144,7 +140,7 @@ class PostControllerMvcIT {
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
                 .andReturn();
 
-        PostResponse response = new ObjectMapper().readValue(
+        PostResponse response = objectMapper.readValue(
                 result.getResponse().getContentAsString(),
                 PostResponse.class
         );
@@ -166,7 +162,7 @@ class PostControllerMvcIT {
         MvcResult getResult = mockMvc.perform(get("/api/posts/" + id))
                 .andExpect(status().isOk())
                 .andReturn();
-        PostResponse getResponse = new ObjectMapper().readValue(
+        PostResponse getResponse = objectMapper.readValue(
                 getResult.getResponse().getContentAsString(),
                 PostResponse.class
         );

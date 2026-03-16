@@ -1,18 +1,16 @@
 package io.github.levldev.blog.unit;
 
-import io.github.levldev.blog.config.MockServiceTestConfig;
 import io.github.levldev.blog.dao.CommentDao;
 import io.github.levldev.blog.dao.PostDao;
 import io.github.levldev.blog.model.Comment;
 import io.github.levldev.blog.model.Post;
 import io.github.levldev.blog.service.CommentServiceImpl;
 import io.github.levldev.blog.web.error.ResourceNotFoundException;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
 import java.util.Optional;
@@ -20,23 +18,17 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-@ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = MockServiceTestConfig.class)
+@ExtendWith(MockitoExtension.class)
 class CommentServiceImplTest {
 
-    @Autowired
+    @InjectMocks
     private CommentServiceImpl commentService;
 
-    @Autowired
+    @Mock
     private CommentDao commentDao;
 
-    @Autowired
+    @Mock
     private PostDao postDao;
-
-    @BeforeEach
-    void resetMocks() {
-        reset(commentDao, postDao);
-    }
 
     @Test
     void getCommentsForPost_returnsComments() {

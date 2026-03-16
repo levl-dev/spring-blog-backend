@@ -2,7 +2,6 @@ package io.github.levldev.blog.it.web;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.github.levldev.blog.config.H2MvcTestConfig;
 import io.github.levldev.blog.dao.CommentDao;
 import io.github.levldev.blog.dao.PostDao;
 import io.github.levldev.blog.model.Comment;
@@ -11,15 +10,12 @@ import io.github.levldev.blog.web.responses.CommentResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.simple.JdbcClient;
-import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
-import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.web.context.WebApplicationContext;
 
 import java.util.List;
 
@@ -27,21 +23,18 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@SpringJUnitConfig(H2MvcTestConfig.class)
-@WebAppConfiguration
-@TestPropertySource(properties = "test.mode=integration")
+@SpringBootTest
+@AutoConfigureMockMvc
 class CommentControllerMvcIT {
 
-    @Autowired WebApplicationContext wac;
     @Autowired JdbcClient jdbcClient;
     @Autowired PostDao postDao;
     @Autowired CommentDao commentDao;
-    MockMvc mockMvc;
-    ObjectMapper objectMapper = new ObjectMapper();
+    @Autowired MockMvc mockMvc;
+    @Autowired ObjectMapper objectMapper;
 
     @BeforeEach
-    void setUp() {
-        mockMvc = MockMvcBuilders.webAppContextSetup(wac).build();
+    void cleanDb() {
         jdbcClient.sql("DELETE FROM public.post_tags").update();
         jdbcClient.sql("DELETE FROM public.comments").update();
         jdbcClient.sql("DELETE FROM public.posts").update();
@@ -76,6 +69,7 @@ class CommentControllerMvcIT {
         long commentId = comment.getId();
 
         String json = "{\"text\":\"UpdatedCommentText\"}";
+
         MvcResult result = mockMvc.perform(put("/api/posts/" + postId + "/comments/" + commentId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(json))
@@ -97,8 +91,7 @@ class CommentControllerMvcIT {
     void deleteComment_returns200_andRemovesFromDb() throws Exception {
         Post post = createPost();
         long postId = post.getId();
-        Comment comment = createComment(postId, "CommentText1");
-        long commentId = comment.getId();
+        Comment comment = createComment(postId, "CommentText1");long commentId = comment.getId();
 
         mockMvc.perform(delete("/api/posts/" + postId + "/comments/" + commentId))
                 .andExpect(status().isNoContent());
