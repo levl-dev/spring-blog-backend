@@ -1,23 +1,19 @@
 package io.github.levldev.blog.it.dao;
 
-import io.github.levldev.blog.config.H2DaoTestConfig;
 import io.github.levldev.blog.dao.PostDao;
 import io.github.levldev.blog.model.Post;
 import io.github.levldev.blog.service.dto.SearchCriteria;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.simple.JdbcClient;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = H2DaoTestConfig.class)
+@SpringBootTest
 class JdbcPostDaoIT {
 
     @Autowired JdbcClient jdbcClient;

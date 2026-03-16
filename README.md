@@ -1,6 +1,6 @@
 # Spring Blog Backend
 
-REST API for a simple blog application built with Spring Framework 6 (without Spring Boot).
+REST API for a simple blog application built with Spring Boot.
 
 ## Features
 
@@ -13,26 +13,30 @@ REST API for a simple blog application built with Spring Framework 6 (without Sp
 ## Tech Stack
 
 - Java 21
-- Spring Framework 6
+- Spring Boot 3
 - PostgreSQL 17
 - H2 (for integration tests)
-- Maven
-- Tomcat
+- Gradle
+- Embedded Tomcat
 
 ## Build
 
-mvn clean package
+./gradlew build
 
-WAR file will be generated in /target directory.
+Executable JAR file will be generated in /build/libs directory.
 
 ## Run
 
-Deploy WAR to external servlet container (Tomcat).
+Run application:
+
+./gradlew bootRun
+
+or run the generated JAR: java -jar build/libs/spring-blog-backend-1.0.jar
 
 Application base URL:
-http://localhost:8080/{artifact-name}
+http://localhost:8080
 
 ## Tests
 
 Run tests:
-mvn test
+./gradlew test
